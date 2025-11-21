@@ -517,21 +517,49 @@ def firma_applications():
     rows = cur.fetchall()
     conn.close()
 
-    # Будуємо рядки таблиці
-    rows_html = "".join(
-        f"""
+    status_options = ["NEW", "REVIEW", "APPROVED", "REJECTED"]
+
+    # будуємо рядки таблиці
+    rows_html = ""
+    for r in rows:
+        app_id = r[0]
+        student_name = r[1]
+        student_email = r[2]
+        job_title = r[3]
+        cover_letter = r[4] or "—"
+        status = r[5]
+        applied_at = r[6]
+
+        # select зі статусами
+        options_html = ""
+        for opt in status_options:
+            selected = "selected" if opt == status else ""
+            label = {
+                "NEW": "NEW (новий)",
+                "REVIEW": "REVIEW (в роботі)",
+                "APPROVED": "APPROVED (схвалено)",
+                "REJECTED": "REJECTED (відхилено)"
+            }[opt]
+            options_html += f'<option value="{opt}" {selected}>{label}</option>'
+
+        rows_html += f"""
         <tr>
-            <td>{r[0]}</td>
-            <td>{r[1]}</td>
-            <td><a href="mailto:{r[2]}">{r[2]}</a></td>
-            <td>{r[3]}</td>
-            <td>{(r[4] or "—")}</td>
-            <td>{r[5]}</td>
-            <td>{r[6]}</td>
+            <td>{app_id}</td>
+            <td>{student_name}</td>
+            <td><a href="mailto:{student_email}">{student_email}</a></td>
+            <td>{job_title}</td>
+            <td>{cover_letter}</td>
+            <td>
+                <form method="POST" action="/firma/applications/{app_id}/status">
+                    <select name="status">
+                        {options_html}
+                    </select>
+                    <button class="btn-secondary" style="margin-top:6px;">Оновити</button>
+                </form>
+            </td>
+            <td>{applied_at}</td>
         </tr>
         """
-        for r in rows
-    )
 
     return f"""
     <html lang="uk">
@@ -555,7 +583,7 @@ def firma_applications():
                     <th>Статус</th>
                     <th>Дата</th>
                 </tr>
-                {rows_html}
+                {rows_html or "<tr><td colspan='7'>Поки що немає заявок.</td></tr>"}
             </table>
 
             <p style="margin-top:20px;">
@@ -566,6 +594,37 @@ def firma_applications():
     </body>
     </html>
     """
+
+@app.route("/firma/applications/<int:app_id>/status", methods=["POST"])
+def update_application_status(app_id):
+    require_role("FIRMA")
+    cid = session["user"]["id"]
+    new_status = request.form.get("status")
+
+    # дозволяємо тільки певні статуси
+    allowed_statuses = {"NEW", "REVIEW", "APPROVED", "REJECTED"}
+    if new_status not in allowed_statuses:
+        return "Некоректний статус", 400
+
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        # оновлюємо тільки ті заявки, що належать вакансіям цієї компанії
+        cur.execute("""
+            UPDATE applications
+            SET status = %s
+            WHERE id = %s
+              AND job_id IN (
+                  SELECT id FROM jobs WHERE company_id = %s
+              )
+        """, (new_status, app_id, cid))
+        conn.commit()
+    finally:
+        conn.close()
+
+    return redirect("/firma/applications")
+
+
 
 
 # ---------- START ----------

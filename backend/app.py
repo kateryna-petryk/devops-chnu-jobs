@@ -19,6 +19,10 @@ def require_login():
 def require_role(role):
     if not is_logged_in() or session["user"]["role"] != role:
         return "403 Forbidden — insufficient permissions", 403
+    
+def require_student():
+    if "user" not in session or session["user"]["role"] != "STUDENT":
+        return redirect("/login")
 
 
 # ---------- Serve static index ----------
@@ -194,7 +198,11 @@ def dashboard():
 </head>
 <body>
     <div class="page">
-    <h1>Кабінет студента</h1><a href='/jobs'>Переглянути вакансії</a>
+    <h1>Кабінет студента</h1>
+    <p>Ви увійшли як студент ЧНУ.</p>
+    <a class="btn-primary" href="/jobs">Переглянути вакансії</a>
+    <br><br>
+    <a class="btn-secondary" href="/applications/mine">Мої відгуки</a>
     </div>
 </body>
 </html>"""
@@ -239,7 +247,6 @@ def job_list():
     rows = cur.fetchall()
     conn.close()
 
-    # Build table rows dynamically
     rows_html = "".join(
         f"<tr>"
         f"<td><a href='/jobs/{r[0]}'>{r[1]}</a></td>"
@@ -258,23 +265,23 @@ def job_list():
         <link rel="stylesheet" href="/css/style.css">
     </head>
     <body>
-        <div class="page">
-            <h1>Вакансії та стажування</h1>
+      <div class="page">
+        <h1>Вакансії та стажування</h1>
 
-            <table>
-                <tr>
-                    <th>Назва</th>
-                    <th>Компанія</th>
-                    <th>Локація</th>
-                    <th>Тип</th>
-                </tr>
-                {rows_html}
-            </table>
+        <table>
+            <tr>
+                <th>Назва</th>
+                <th>Компанія</th>
+                <th>Локація</th>
+                <th>Тип</th>
+            </tr>
+            {rows_html or "<tr><td colspan='4'>Поки що немає активних вакансій.</td></tr>"}
+        </table>
 
-            <p style="margin-top:20px;">
-                <a href="/">← На головну</a>
-            </p>
-        </div>
+        <p style="margin-top:20px;">
+            <a href="/">← На головну</a>
+        </p>
+      </div>
     </body>
     </html>
     """
@@ -386,6 +393,80 @@ def apply(job_id):
     # Повертаємося до сторінки вакансії з зеленим повідомленням
     return redirect(f"/jobs/{job_id}?success=Ваш+відгук+успішно+надіслано")
 
+@app.route("/applications/mine")
+def my_applications():
+    if "user" not in session or session["user"]["role"] != "STUDENT":
+        return redirect("/login")
+
+    student_id = session["user"]["id"]
+
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT 
+            a.id,
+            j.title,
+            j.location,
+            a.status,
+            a.applied_at
+        FROM applications a
+        JOIN jobs j ON j.id = a.job_id
+        WHERE a.student_id = %s
+        ORDER BY a.applied_at DESC
+    """, (student_id,))
+    rows = cur.fetchall()
+    conn.close()
+
+    rows_html = ""
+    for r in rows:
+        app_id = r[0]
+        job_title = r[1]
+        location = r[2]
+        status = r[3]
+        applied_at = r[4]
+
+        rows_html += f"""
+        <tr>
+            <td>{app_id}</td>
+            <td>{job_title}</td>
+            <td>{location}</td>
+            <td>{status}</td>
+            <td>{applied_at}</td>
+        </tr>
+        """
+
+    return f"""
+    <html lang="uk">
+    <head>
+        <meta charset="UTF-8">
+        <title>Мої відгуки – ЧНУ Jobs</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body>
+        <div class="page">
+
+            <h1>Мої відгуки на вакансії</h1>
+
+            <table>
+                <tr>
+                    <th>ID заявки</th>
+                    <th>Вакансія</th>
+                    <th>Локація</th>
+                    <th>Статус</th>
+                    <th>Дата подачі</th>
+                </tr>
+                {rows_html or "<tr><td colspan='5'>Ви ще не відгукувались на вакансії.</td></tr>"}
+            </table>
+
+            <p style="margin-top:20px;">
+                <a href="/dashboard">← Повернутися в кабінет</a>
+            </p>
+
+        </div>
+    </body>
+    </html>
+    """
+
 
 
 # ---------- FIRMA CREATE JOB ----------
@@ -447,20 +528,41 @@ def firma_jobs():
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
-        SELECT id, title, location FROM jobs
+        SELECT id, title, location, is_active 
+        FROM jobs
         WHERE company_id = %s
+        ORDER BY created_at DESC
     """, (cid,))
     jobs = cur.fetchall()
     conn.close()
 
-    rows_html = "".join(
-        f"<tr>"
-        f"<td>{j[0]}</td>"
-        f"<td>{j[1]}</td>"
-        f"<td>{j[2]}</td>"
-        f"</tr>"
-        for j in jobs
-    )
+    rows_html = ""
+    for j in jobs:
+        job_id = j[0]
+        title = j[1]
+        location = j[2]
+        is_active = j[3]
+
+        status_label = "Активна" if is_active else "Закрита"
+
+        # кнопка "Закрити" тільки для активних
+        close_button = ""
+        if is_active:
+            close_button = f"""
+            <form method="POST" action="/firma/jobs/{job_id}/close" style="display:inline;">
+                <button class="btn-secondary" style="margin-top:4px;">Закрити вакансію</button>
+            </form>
+            """
+
+        rows_html += f"""
+        <tr>
+            <td>{job_id}</td>
+            <td>{title}</td>
+            <td>{location}</td>
+            <td>{status_label}</td>
+            <td>{close_button}</td>
+        </tr>
+        """
 
     return f"""
     <html lang="uk">
@@ -478,8 +580,10 @@ def firma_jobs():
                     <th>ID</th>
                     <th>Назва вакансії</th>
                     <th>Локація</th>
+                    <th>Статус</th>
+                    <th>Дії</th>
                 </tr>
-                {rows_html}
+                {rows_html or "<tr><td colspan='5'>Поки що немає вакансій.</td></tr>"}
             </table>
 
             <p style="margin-top:20px;">
@@ -489,6 +593,26 @@ def firma_jobs():
     </body>
     </html>
     """
+
+# ---------- CLOSE THE JOB ----------
+@app.route("/firma/jobs/<int:job_id>/close", methods=["POST"])
+def close_job(job_id):
+    require_role("FIRMA")
+    cid = session["user"]["id"]
+
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            UPDATE jobs
+            SET is_active = FALSE
+            WHERE id = %s AND company_id = %s
+        """, (job_id, cid))
+        conn.commit()
+    finally:
+        conn.close()
+
+    return redirect("/firma/jobs/mine")
 
 
 # ---------- FIRMA APPLICATIONS ----------

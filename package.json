@@ -1,0 +1,11 @@
+{
+  "name": "students-job-website",
+  "version": "0.1.0",
+  "description": "Навчальний проект: Students Job Website (Student & Firma roles)",
+  "scripts": {
+    "start": "serve src"
+  },
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}

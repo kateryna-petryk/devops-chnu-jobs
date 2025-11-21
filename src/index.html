@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <title>ЧНУ Jobs – сервіс пошуку роботи для студентів ЧНУ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ЧНУ Jobs — платформа для студентів Чернівецького національного університету, яка допомагає знайти роботу, стажування або практику в Чернівцях та за їх межами." />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: #f5f5f7;
+      color: #111827;
+      line-height: 1.5;
+    }
+
+    header {
+      background: #111827;
+      color: #f9fafb;
+      padding: 16px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 1.25rem;
+      letter-spacing: 0.03em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 16px;
+    }
+
+    .nav-links a {
+      color: #e5e7eb;
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+
+    .nav-links a:hover {
+      text-decoration: underline;
+    }
+
+    .btn-outline {
+      border: 1px solid #e5e7eb;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 0.9rem;
+      background: transparent;
+      color: #f9fafb;
+      cursor: pointer;
+    }
+
+    .btn-outline:hover {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .hero {
+      padding: 56px 0 40px;
+    }
+
+    .hero-inner {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .hero-text {
+      flex: 1 1 300px;
+      max-width: 560px;
+    }
+
+    .hero-title {
+      font-size: 2.4rem;
+      margin-bottom: 16px;
+      font-weight: 800;
+    }
+
+    .hero-subtitle {
+      font-size: 1.02rem;
+      color: #4b5563;
+      margin-bottom: 24px;
+    }
+
+    .hero-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .badge {
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      background: #e5f2ff;
+      color: #1d4ed8;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .btn-primary {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 20px;
+      font-size: 0.96rem;
+      font-weight: 600;
+      background: #2563eb;
+      color: #f9fafb;
+      cursor: pointer;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-secondary {
+      border-radius: 999px;
+      padding: 9px 18px;
+      font-size: 0.94rem;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      color: #111827;
+      cursor: pointer;
+    }
+
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+
+    .hero-note {
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+
+    .hero-card {
+      flex: 1 1 260px;
+      max-width: 360px;
+      background: #111827;
+      color: #f9fafb;
+      border-radius: 24px;
+      padding: 20px 20px 18px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
+    }
+
+    .hero-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+    }
+
+    .hero-card p {
+      font-size: 0.92rem;
+      color: #e5e7eb;
+      margin-bottom: 12px;
+    }
+
+    .hero-card ul {
+      list-style: none;
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+    }
+
+    .hero-card li::before {
+      content: "• ";
+      color: #60a5fa;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15, 118, 110, 0.2);
+      color: #a7f3d0;
+    }
+
+    .section {
+      padding: 40px 0;
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      font-size: 0.95rem;
+      color: #6b7280;
+      margin-bottom: 28px;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(148, 163, 184, 0.25);
+    }
+
+    .card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      color: #4b5563;
+      margin-bottom: 10px;
+    }
+
+    .card ul {
+      font-size: 0.88rem;
+      color: #4b5563;
+      padding-left: 16px;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .list {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 18px 18px 12px;
+      box-shadow: 0 8px 20px rgba(148, 163, 184, 0.25);
+      font-size: 0.9rem;
+    }
+
+    .list h3 {
+      margin-bottom: 8px;
+    }
+
+    .list-item {
+      margin-bottom: 6px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .list-bullet {
+      margin-top: 4px;
+      font-size: 1.2rem;
+    }
+
+    .contact-section {
+      padding: 40px 0 50px;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
+    .contact-card {
+      background: #111827;
+      color: #f9fafb;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.4);
+      font-size: 0.9rem;
+    }
+
+    .contact-card h3 {
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+    }
+
+    .contact-card p {
+      margin-bottom: 6px;
+      color: #e5e7eb;
+    }
+
+    .contact-card a {
+      color: #93c5fd;
+      text-decoration: none;
+    }
+
+    .contact-card a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      background: #020617;
+      color: #9ca3af;
+      padding: 16px 0;
+      font-size: 0.82rem;
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: #9ca3af;
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 640px) {
+      .hero {
+        padding-top: 32px;
+      }
+      .hero-title {
+        font-size: 1.9rem;
+      }
+      .nav-links {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="nav">
+        <div class="logo">ChNU Jobs</div>
+        <nav class="nav-links">
+          <a href="#about">Про платформу</a>
+          <a href="#roles">Для кого</a>
+          <a href="#contacts">Контакти</a>
+        </nav>
+        <div>
+          <button class="btn-outline">Увійти</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero" id="top">
+      <div class="container">
+        <div class="hero-inner">
+          <div class="hero-text">
+            <h1 class="hero-title">Перша робота та практика для студентів ЧНУ.</h1>
+            <p class="hero-subtitle">
+              <strong>ChNU Jobs</strong> — це платформа для студентів Чернівецького національного університету 
+              ім. Юрія Федьковича, яка допомагає знайти роботу, стажування або виробничу практику 
+              у Чернівцях та за їх межами.
+            </p>
+            <div class="hero-badges">
+              <span class="badge">Для студентів ЧНУ</span>
+              <span class="badge">Роль: Student</span>
+              <span class="badge">Роль: Firma (Company)</span>
+              <span class="badge">Практика · Стажування · Робота</span>
+            </div>
+            <div class="hero-actions">
+              <button class="btn-primary">Я — студент ЧНУ</button>
+              <button class="btn-secondary">Я представляю компанію</button>
+            </div>
+            <p class="hero-note">
+              Це навчальна версія платформи. Повний функціонал реєстрації, пошуку вакансій 
+              та відгуків для студентів ЧНУ буде реалізовано на наступних етапах розробки.
+            </p>
+          </div>
+          <aside class="hero-card" aria-label="Короткий опис системи">
+            <h3>Що таке ChNU Jobs?</h3>
+            <p>
+              Навчальний веб-проєкт, створений як прототип кар'єрного сервісу 
+              для студентів Чернівецького національного університету. 
+              Мета — спростити шлях від “я студент ЧНУ” до “я маю першу роботу”.
+            </p>
+            <ul>
+              <li>Фокус на потребах студентів ЧНУ</li>
+              <li>Окремі кабінети для Student та Firma</li>
+              <li>Відгуки на вакансії та статус заявок</li>
+            </ul>
+            <span class="pill">Стан: навчальний концепт · v0.1</span>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT / FEATURES -->
+    <section class="section" id="about">
+      <div class="container">
+        <h2 class="section-title">Що планує вміти ChNU Jobs?</h2>
+        <p class="section-subtitle">
+          Проєкт орієнтований на студентів ЧНУ і розробляється за підходом Agile. 
+          Нижче — основні можливості, які будуть реалізовуватися поступово.
+        </p>
+
+        <div class="cards-grid">
+          <article class="card">
+            <h3>Для студентів ЧНУ</h3>
+            <p>Пошук першої роботи, стажування або практики з урахуванням навчання.</p>
+            <ul>
+              <li>Профіль студента з факультетом, спеціальністю та курсом.</li>
+              <li>Список вакансій, стажувань і практик від партнерських компаній.</li>
+              <li>Подання заявки та відстеження її статусу онлайн.</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>Для компаній (Firma)</h3>
+            <p>Можливість знайти мотивованих студентів ЧНУ у Чернівцях.</p>
+            <ul>
+              <li>Профіль компанії з описом, напрямом та контактами.</li>
+              <li>Створення вакансій, пропозицій практики та стажувань.</li>
+              <li>Перегляд заявок студентів ЧНУ та оновлення їх статусу.</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>Розвиток платформи</h3>
+            <p>Функціонал буде розширюватися відповідно до навчальних спринтів.</p>
+            <ul>
+              <li>Спринт 1: документація + landing page для ЧНУ Jobs.</li>
+              <li>Спринт 2: базовий back-end та робота з вакансіями.</li>
+              <li>Спринт 3+: особисті кабінети, фільтри, додаткові сервіси.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ROLES & FLOW -->
+    <section class="section" id="roles">
+      <div class="container">
+        <h2 class="section-title">Дві основні ролі: Student та Firma</h2>
+        <p class="section-subtitle">
+          ЧНУ Jobs об'єднує студентів Чернівецького національного університету та компанії, 
+          які хочуть співпрацювати зі студентами та випускниками ЧНУ.
+        </p>
+
+        <div class="split">
+          <div class="list">
+            <h3>Шлях студента ЧНУ</h3>
+            <div class="list-item">
+              <span class="list-bullet">1</span>
+              <div>Реєстрація та створення профілю студента ЧНУ.</div>
+            </div>
+            <div class="list-item">
+              <span class="list-bullet">2</span>
+              <div>Перегляд вакансій, стажувань і практик, орієнтованих на студентів ЧНУ.</div>
+            </div>
+            <div class="list-item">
+              <span class="list-bullet">3</span>
+              <div>Відгук на обрану пропозицію та очікування відповіді компанії.</div>
+            </div>
+            <div class="list-item">
+              <span class="list-bullet">4</span>
+              <div>Перегляд статусу заявок (New, InReview, Interview, Offer тощо).</div>
+            </div>
+          </div>
+
+          <div class="list">
+            <h3>Шлях компанії (Firma)</h3>
+            <div class="list-item">
+              <span class="list-bullet">1</span>
+              <div>Реєстрація компанії та заповнення профілю з інформацією про діяльність.</div>
+            </div>
+            <div class="list-item">
+              <span class="list-bullet">2</span>
+              <div>Створення вакансій, стажувань та програм практики для студентів ЧНУ.</div>
+            </div>
+            <div class="list-item">
+              <span class="list-bullet">3</span>
+              <div>Отримання та перегляд заявок від студентів ЧНУ.</div>
+            </div>
+            <div class="list-item">
+              <span class="list-bullet">4</span>
+              <div>Оновлення статусів заявок та комунікація з кандидатами.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACTS -->
+    <section class="contact-section" id="contacts">
+      <div class="container">
+        <h2 class="section-title">Контакти та інформація про проєкт</h2>
+        <p class="section-subtitle">
+          ЧНУ Jobs — навчальний проєкт, орієнтований на студентів Чернівецького національного університету. 
+          Нижче наведено умовні контактні дані.
+        </p>
+
+        <div class="contact-grid">
+          <div class="contact-card">
+            <h3>Для студентів ЧНУ</h3>
+            <p>Якщо ви студент ЧНУ і хочете скористатися платформою, напишіть нам:</p>
+            <p>Email: <a href="mailto:students@chnu-jobs.test">students@chnu-jobs.test</a></p>
+          </div>
+
+          <div class="contact-card">
+            <h3>Для компаній (Firma)</h3>
+            <p>Компанії, які хочуть пропонувати роботу, практику чи стажування студентам ЧНУ, можуть звертатися за адресою:</p>
+            <p>Email: <a href="mailto:partners@chnu-jobs.test">partners@chnu-jobs.test</a></p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div>© 2025 ЧНУ Jobs. Навчальний проєкт для студентів ЧНУ.</div>
+        <div class="footer-links">
+          <a href="#top">Вгору</a>
+          <a href="#about">Про платформу</a>
+          <a href="#roles">Для кого</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

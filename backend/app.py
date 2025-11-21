@@ -225,6 +225,9 @@ def dashboard():
         <a href='/firma/jobs/mine'>Мої вакансії</a><br>
         <a href='/firma/applications'>Заявки студентів</a>
         </div>
+        <p style="margin-top:20px;">
+            <a href="/">← На головну</a>
+        </p>
 </body>
 </html>
         """
@@ -492,6 +495,9 @@ def job_form():
       Тип: <input name="employment_type"><br>
       Опис: <textarea name="description"></textarea><br>
       <button>Створити</button>
+      <p style="margin-top:20px;">
+            <a href="/dashboard">← Повернутися в кабінет</a>
+        </p>
     </form>
     </div>
     </body>

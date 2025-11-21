@@ -203,6 +203,9 @@ def dashboard():
     <a class="btn-primary" href="/jobs">Переглянути вакансії</a>
     <br><br>
     <a class="btn-secondary" href="/applications/mine">Мої відгуки</a>
+    <p style="margin-top:20px;">
+            <a href="/">← На головну</a>
+        </p>
     </div>
 </body>
 </html>"""
@@ -277,9 +280,9 @@ def job_list():
             </tr>
             {rows_html or "<tr><td colspan='4'>Поки що немає активних вакансій.</td></tr>"}
         </table>
-
+ 
         <p style="margin-top:20px;">
-            <a href="/">← На головну</a>
+            <a href="/dashboard">← Повернутися в кабінет</a>
         </p>
       </div>
     </body>

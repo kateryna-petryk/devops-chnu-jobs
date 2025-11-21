@@ -224,10 +224,11 @@ def dashboard():
         <a href='/firma/jobs/new'>Створити вакансію</a><br>
         <a href='/firma/jobs/mine'>Мої вакансії</a><br>
         <a href='/firma/applications'>Заявки студентів</a>
-        </div>
+        <br><br>
         <p style="margin-top:20px;">
             <a href="/">← На головну</a>
         </p>
+        </div>
 </body>
 </html>
         """

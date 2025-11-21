@@ -581,4 +581,4 @@ if __name__ == "__main__":
             print("DB not ready, retrying...")
             time.sleep(3)
 
-    app.run(host="0.0.0.0", port=int(os.getenv("APP_PORT", 3000)))
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 3000)))

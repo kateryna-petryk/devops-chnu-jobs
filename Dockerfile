@@ -1,19 +1,12 @@
-FROM node:20-alpine
+FROM python:3.11-slim
 
-# Робоча директорія всередині контейнера
 WORKDIR /app
 
-# Копіюємо package.json і package-lock.json (якщо є)
-COPY package*.json ./
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Встановлюємо залежності
-RUN npm install
-
-# Копіюємо увесь проєкт
 COPY . .
 
-# Порт, на якому працює додаток
 EXPOSE 3000
 
-# Команда запуску
-CMD ["npm", "start"]
+CMD ["python", "backend/app.py"]

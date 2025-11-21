@@ -570,15 +570,24 @@ def firma_applications():
 
 # ---------- START ----------
 if __name__ == "__main__":
-    # retry system like Node.js version
+    import os
     import time
 
-    for i in range(10):
+    # Короткий ретрай БД, щоб не блокувати старт сервера надовго
+    max_retries = 5
+    delay_sec = 2
+
+    for attempt in range(1, max_retries + 1):
         try:
             init_db()
+            print("DB init OK")
             break
         except Exception as e:
-            print("DB not ready, retrying...")
-            time.sleep(3)
+            print(f"DB not ready, retrying {attempt}/{max_retries}...", e)
+            if attempt == max_retries:
+                print("Giving up on DB init for now, starting app anyway.")
+                break
+            time.sleep(delay_sec)
 
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 3000)))
+    port = int(os.getenv("PORT", 3000))
+    app.run(host="0.0.0.0", port=port)

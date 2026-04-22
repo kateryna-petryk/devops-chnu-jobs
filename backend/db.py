@@ -1,34 +1,31 @@
-import psycopg2
 import os
-from dotenv import load_dotenv
 from urllib.parse import urlparse
+
+import psycopg
+from dotenv import load_dotenv
 
 load_dotenv()
 
+
 def get_connection():
-    """
-    Підключення до БД.
-    - Якщо є DATABASE_URL (наприклад, на Render) – використовуємо його.
-    - Інакше – збираємо з POSTGRES_* змінних (локальний Docker).
-    """
     database_url = os.getenv("DATABASE_URL")
 
     if database_url:
-        # Очікується URL типу: postgres://user:pass@host:port/dbname
-        url = urlparse(database_url)
-        return psycopg2.connect(
-            dbname=url.path[1:],
-            user=url.username,
-            password=url.password,
-            host=url.hostname,
-            port=url.port
+        parsed = urlparse(database_url)
+        return psycopg.connect(
+            dbname=parsed.path.lstrip("/"),
+            user=parsed.username,
+            password=parsed.password,
+            host=parsed.hostname,
+            port=parsed.port or 5432,
+            connect_timeout=5,
         )
-    else:
-        # Локальний варіант (Docker Compose)
-        return psycopg2.connect(
-            dbname=os.getenv("POSTGRES_DB"),
-            user=os.getenv("POSTGRES_USER"),
-            password=os.getenv("POSTGRES_PASSWORD"),
-            host=os.getenv("POSTGRES_HOST", "localhost"),
-            port=os.getenv("POSTGRES_PORT", 5432)
-        )
+
+    return psycopg.connect(
+        dbname=os.getenv("POSTGRES_DB", "chnu_jobs"),
+        user=os.getenv("POSTGRES_USER", "chnu_jobs"),
+        password=os.getenv("POSTGRES_PASSWORD", "chnu_jobs_password"),
+        host=os.getenv("POSTGRES_HOST", "localhost"),
+        port=int(os.getenv("POSTGRES_PORT", "5432")),
+        connect_timeout=5,
+    )

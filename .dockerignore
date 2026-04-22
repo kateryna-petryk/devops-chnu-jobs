@@ -1,0 +1,12 @@
+.git
+.DS_Store
+.env
+.venv
+__MACOSX
+node_modules
+__pycache__
+*.pyc
+.pytest_cache
+tests
+load_tests/__pycache__
+projectDocumentary

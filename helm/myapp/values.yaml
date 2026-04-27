@@ -1,0 +1,68 @@
+replicaCount: 2
+
+image:
+  repository: chnu-jobs
+  pullPolicy: IfNotPresent
+  tag: ci
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  type: NodePort
+  port: 3000
+  targetPort: 3000
+
+ingress:
+  enabled: false
+
+httpRoute:
+  enabled: false
+
+resources: {}
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: http
+
+readinessProbe:
+  httpGet:
+    path: /
+    port: http
+
+autoscaling:
+  enabled: false
+
+volumes: []
+volumeMounts: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+db:
+  host: myapp-postgresql
+  port: 5432
+  name: appdb
+  user: appuser
+  password: apppassword
+
+postgresql:
+  auth:
+    username: appuser
+    password: apppassword
+    database: appdb

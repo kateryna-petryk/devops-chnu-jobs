@@ -2,18 +2,23 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: myapp
+  labels:
+    app.kubernetes.io/instance: myapp
+    app.kubernetes.io/name: myapp
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: myapp
+      app.kubernetes.io/instance: myapp
+      app.kubernetes.io/name: myapp
   template:
     metadata:
       labels:
-        app: myapp
+        app.kubernetes.io/instance: myapp
+        app.kubernetes.io/name: myapp
     spec:
       containers:
         - name: myapp
-          image: nginx:1.25
+          image: chnu-jobs:ci
           ports:
-            - containerPort: 80
+            - containerPort: 3000

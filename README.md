@@ -114,12 +114,26 @@ What Compose does:
 - waits until the database is healthy
 - starts the Flask app
 - automatically creates the database schema during app startup
+- adds demo users, companies, jobs, and applications during app startup
 
 After startup:
 
 - app: `http://localhost:3000`
 - health endpoint: `http://localhost:3000/health`
 - postgres: `localhost:5432`
+
+## Demo accounts
+
+The startup seed creates these accounts:
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Student | `olena.student@example.com` | `student123` |
+| Student | `andrii.student@example.com` | `student123` |
+| Student | `sofia.student@example.com` | `student123` |
+| Company | `softserve@example.com` | `firma123` |
+| Company | `buktech@example.com` | `firma123` |
+| Admin | `admin@example.com` | `admin123` |
 
 To stop the project:
 

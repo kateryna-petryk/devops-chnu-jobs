@@ -3,6 +3,7 @@
 .venv/
 __MACOSX/
 node_modules/
+minikube-*
 __pycache__/
 *.py[cod]
 .pytest_cache/

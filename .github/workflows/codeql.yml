@@ -19,21 +19,8 @@ permissions:
   security-events: write
 
 jobs:
-  skip-private-repo:
-    name: Skip on private repositories
-    if: ${{ github.event.repository.private == true }}
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Explain why CodeQL is skipped
-        run: |
-          echo "CodeQL is being skipped because this repository is private."
-          echo "If the repository becomes public, or is moved to an organization with GitHub Code Security enabled,"
-          echo "the analyze job in this workflow can run normally."
-
   analyze:
     name: Analyze Python code
-    if: ${{ github.event.repository.private != true }}
     runs-on: ubuntu-latest
 
     steps:

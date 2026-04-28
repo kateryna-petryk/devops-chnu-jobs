@@ -12,6 +12,16 @@ def test_health_endpoint(client):
     assert response.get_json() == {"status": "ok", "database": "up"}
 
 
+def test_metrics_endpoint(client):
+    client.get("/health")
+    response = client.get("/metrics")
+
+    assert response.status_code == 200
+    metrics = response.get_data(as_text=True)
+    assert "http_requests_total" in metrics
+    assert "http_request_duration_seconds" in metrics
+
+
 def test_registration_and_login_flow(client, fake_state):
     register_response = client.post(
         "/register",

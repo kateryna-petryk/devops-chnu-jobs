@@ -12,6 +12,7 @@ spec:
   template:
     metadata:
       labels:
+        app: {{ .Release.Name }}
         {{- include "myapp.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}

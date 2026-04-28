@@ -3,6 +3,7 @@ kind: Service
 metadata:
   name: {{ include "myapp.fullname" . }}
   labels:
+    app: {{ .Release.Name }}
     {{- include "myapp.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
@@ -12,4 +13,5 @@ spec:
       protocol: TCP
       name: http
   selector:
+    app: {{ .Release.Name }}
     {{- include "myapp.selectorLabels" . | nindent 4 }}

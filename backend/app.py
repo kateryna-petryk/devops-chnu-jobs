@@ -4,14 +4,26 @@ import time
 from functools import wraps
 
 import bcrypt
-from flask import Flask, jsonify, redirect, request, send_from_directory, session
+from flask import Flask, Response, jsonify, redirect, request, send_from_directory, session
 from markupsafe import escape
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 
 from backend.db import get_connection
 from backend.models import init_db
 
 ALLOWED_ROLES = {"STUDENT", "FIRMA", "ADMIN"}
 ALLOWED_APPLICATION_STATUSES = ("NEW", "REVIEW", "APPROVED", "REJECTED")
+
+HTTP_REQUESTS_TOTAL = Counter(
+    "http_requests_total",
+    "Total HTTP requests handled by the Flask application.",
+    ["method", "endpoint", "status"],
+)
+HTTP_REQUEST_DURATION_SECONDS = Histogram(
+    "http_request_duration_seconds",
+    "HTTP request latency in seconds.",
+    ["method", "endpoint"],
+)
 
 
 def configure_logging() -> None:
@@ -72,6 +84,25 @@ def initialize_database_with_retry(app: Flask) -> None:
 
 
 def register_routes(app: Flask) -> None:
+    @app.before_request
+    def start_metrics_timer():
+        request._metrics_start_time = time.perf_counter()
+
+    @app.after_request
+    def record_http_metrics(response):
+        if request.path == "/metrics":
+            return response
+
+        endpoint = request.url_rule.rule if request.url_rule else request.path
+        status = str(response.status_code)
+        duration = time.perf_counter() - getattr(
+            request, "_metrics_start_time", time.perf_counter()
+        )
+
+        HTTP_REQUESTS_TOTAL.labels(request.method, endpoint, status).inc()
+        HTTP_REQUEST_DURATION_SECONDS.labels(request.method, endpoint).observe(duration)
+        return response
+
     def current_user():
         return session.get("user")
 
@@ -161,6 +192,10 @@ def register_routes(app: Flask) -> None:
         except Exception as exc:
             app.logger.warning("Health check failed: %s", exc)
         return jsonify({"status": "error", "database": "down"}), 503
+
+    @app.route("/metrics")
+    def metrics():
+        return Response(generate_latest(), mimetype=CONTENT_TYPE_LATEST)
 
     @app.route("/register", methods=["GET"])
     def register_page():
